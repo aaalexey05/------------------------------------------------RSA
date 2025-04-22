@@ -1,0 +1,134 @@
+import math
+
+def is_prime(n):
+    """Проверка числа на простоту"""
+    if n < 2:
+        return False
+    for p in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]:
+        if n % p == 0:
+            return n == p
+    d = n - 1
+    s = 0
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+    for a in [2, 325, 9375, 28178, 450775, 9780504, 1795265022]:
+        if a >= n:
+            continue
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(s - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
+
+def gcd(a, b):
+    """Наибольший общий делитель"""
+    while b != 0:
+        a, b = b, a % b
+    return a
+
+def multiplicative_inverse(e, phi):
+    """Поиск мультипликативного обратного"""
+    d = 0
+    x1, x2 = 0, 1
+    y1, y2 = 1, 0
+    temp_phi = phi
+    
+    while e > 0:
+        temp1 = temp_phi // e
+        temp2 = temp_phi - temp1 * e
+        temp_phi = e
+        e = temp2
+        
+        x = x2 - temp1 * x1
+        y = y2 - temp1 * y1
+        
+        x2 = x1
+        x1 = x
+        y2 = y1
+        y1 = y
+    
+    if temp_phi == 1:
+        d = y2 + phi
+    
+    return d
+
+def generate_keypair(p, q):
+    """Генерация пары ключей"""
+    if not (is_prime(p) and is_prime(q)):
+        raise ValueError("Оба числа должны быть простыми")
+    
+    n = p * q
+    phi = (p-1) * (q-1)
+    
+    # Выбираем e такое, что 1 < e < phi и взаимно простое с phi
+    e = 65537  # Распространенное значение для e
+    while gcd(e, phi) != 1:
+        e -= 1
+    
+    d = multiplicative_inverse(e, phi)
+    
+    return ((e, n), (d, n))
+
+def encrypt(public_key, plaintext):
+    """Шифрование сообщения"""
+    e, n = public_key
+    cipher = [pow(ord(char), e, n) for char in plaintext]
+    return cipher
+
+def decrypt(private_key, ciphertext):
+    """Дешифрование сообщения"""
+    d, n = private_key
+    plain = [chr(pow(char, d, n)) for char in ciphertext]
+    return ''.join(plain)
+
+def main():
+    print("RSA Шифрование/Дешифрование")
+    print("=" * 30)
+    
+    mode = input("Выберите режим:\n1 - Шифрование (ввести p, q)\n2 - Дешифрование (ввести d, n)\n> ")
+    
+    if mode == '1':
+        # Режим шифрования
+        print("\nВведите простые числа p и q:")
+        p = int(input("p = "))
+        q = int(input("q = "))
+        
+        try:
+            public, private = generate_keypair(p, q)
+            print(f"\nПубличный ключ (e, n): {public}")
+            print(f"Приватный ключ (d, n): {private}")
+            
+            message = input("\nВведите сообщение для шифрования: ")
+            encrypted_msg = encrypt(public, message)
+            print(f"\nЗашифрованное сообщение: {encrypted_msg}")
+            
+        except ValueError as e:
+            print(f"Ошибка: {e}")
+    
+    elif mode == '2':
+        # Режим дешифрования
+        print("\nВведите секретный ключ:")
+        d = int(input("d = "))
+        n = int(input("n = "))
+        private_key = (d, n)
+        
+        cipher_input = input("\nВведите зашифрованное сообщение (числа через пробел): ")
+        ciphertext = list(map(int, cipher_input.split()))
+        
+        try:
+            decrypted_msg = decrypt(private_key, ciphertext)
+            print(f"\nДешифрованное сообщение: {decrypted_msg}")
+        except:
+            print("Ошибка при дешифровании. Проверьте введенные данные.")
+    
+    else:
+        print("Неверный выбор режима")
+
+if __name__ == "__main__":
+    main()
