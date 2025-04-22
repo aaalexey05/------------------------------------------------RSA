@@ -96,9 +96,9 @@ RSA is widely used for:
 
 1. **Клонирование репозитория**:
    Клонируйте репозиторий на ваш локальный компьютер с помощью команды:
-   ```bash git clone https://github.com/your-username/rsa-encryption.git   ```
-   ```bash cd rsa-encryption```
-   ```bash pip install -r requirements.txt```
+   - ```bash git clone https://github.com/your-username/rsa-encryption.git```
+   - ```bash cd rsa-encryption```
+   - ```bash pip install -r requirements.txt```
 
 ### Как работать с проектом:
 Проект включает два основных компонента: командную версию и графическое приложение.
